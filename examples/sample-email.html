@@ -1,0 +1,100 @@
+<html><body style="font-family:'Malgun Gothic',-apple-system,sans-serif;font-size:16px;line-height:1.9;color:#222;max-width:640px;margin:0 auto;padding:16px;text-align:center;">
+<h1 style="font-size:22px;margin:0;line-height:1.5;text-align:center;">HBM 적층이 어려운 이유, 12단부터 달라지는 것</h1>
+<p style="margin:0;line-height:1.9;">&nbsp;</p>
+<table style='border-collapse:collapse;width:100%;margin:0 auto;'>
+<tr><th style='background:#f2f2f2;border:1px solid #ddd;padding:8px 10px;text-align:center;width:32%;'>이슈</th><th style='background:#f2f2f2;border:1px solid #ddd;padding:8px 10px;text-align:center;'>핵심 포인트</th></tr>
+<tr><td style='border:1px solid #ddd;padding:8px 10px;text-align:center;'>A사 HBM 일정</td><td style='border:1px solid #ddd;padding:8px 10px;text-align:center;'>양산을 앞당겼지만 적층 단수가 늘어 난이도가 오른다</td></tr>
+<tr><td style='border:1px solid #ddd;padding:8px 10px;text-align:center;'>열 관리</td><td style='border:1px solid #ddd;padding:8px 10px;text-align:center;'>층이 늘수록 열이 빠져나갈 길이 길어진다</td></tr>
+<tr><td style='border:1px solid #ddd;padding:8px 10px;text-align:center;'>취준생 관점</td><td style='border:1px solid #ddd;padding:8px 10px;text-align:center;'>칩 설계만큼 쌓고 식히는 기술이 중요해졌다</td></tr>
+</table>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+
+<p style='margin:0;line-height:1.9;text-align:center;'>일정을 당긴 건 자신감보다 <b>경쟁 압박</b>에 가깝다고 본다.<br/>
+메모리를 한 층 더 쌓는 건 아파트에 한 층 올리는 것과 다르다.</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+<p style='margin:0;border-left:4px solid #222;padding:6px 0 6px 16px;font-size:19px;font-weight:bold;color:#111;line-height:1.6;text-align:left;'>쌓을수록 뜨거워지는 이유</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>층이 늘면 <b>열이 빠져나갈 길이 길어진다.</b><br/>
+○○일보에 따르면 이번 제품은 기존보다 4단을 더 쌓는다.</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+<div style='margin:20px 0;padding:14px 16px;border:2px dashed #2f6fdb;border-radius:6px;background:#f5f9ff;text-align:left;'>
+<div style='font-size:13px;font-weight:bold;color:#2f6fdb;margin-bottom:6px;'>[사진1] 이 자리에 아래 실제 사진 넣기</div>
+<div style='font-size:14px;color:#333;margin-bottom:10px;'>실제 HBM 패키지 사진으로 적층 구조 설명</div>
+<div style='font-size:13px;line-height:1.6;word-break:break-all;'><a href='https://commons.wikimedia.org/wiki/File:AMD_Fiji_GPU_package_with_GPU,_HBM_memory_and_interposer.jpg' style='color:#2f6fdb;'>https://commons.wikimedia.org/wiki/File:AMD_Fiji_GPU_package_with_GPU,_HBM_memory_and_interposer.jpg</a></div>
+<div style='font-size:12px;color:#666;margin-top:8px;'>저작자: C. Spille (pcgameshardware.de) / 라이선스: CC BY-SA 4.0</div>
+<div style='font-size:12px;color:#888;margin-top:8px;margin-bottom:4px;'>사진 바로 아래에 이 한 줄을 그대로 넣어줘 (출처 표기)</div>
+<div style='font-size:13px;color:#111;background:#fff;border:1px solid #ddd;border-radius:4px;padding:8px 10px;'>사진: C. Spille, Wikimedia Commons (CC BY-SA 4.0)</div>
+</div>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>열은 맨 아래 바닥을 거쳐 빠져나간다.<br/>
+그래서 가운데 층일수록 열이 오래 머문다.</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+<div style='margin:0;padding:14px 16px;border:2px dashed #d48a4a;border-radius:6px;background:#fdf9f5;text-align:left;'>
+<div style='font-size:13px;font-weight:bold;color:#d48a4a;margin-bottom:8px;text-align:center;'>[그래프] 이 자리에 그래프 넣기</div>
+<div style='font-size:16px;font-weight:bold;color:#111;margin-bottom:10px;text-align:center;'>적층 단수와 칩 온도</div>
+<div style='font-size:14px;color:#333;margin:4px 0;'><b>가로축</b> 적층 단수 (4단~16단)</div>
+<div style='font-size:14px;color:#333;margin:4px 0;'><b>세로축</b> 칩 내부 최고 온도</div>
+<div style='font-size:14px;color:#333;margin:8px 0 0 0;line-height:1.7;'><b>그릴 내용</b> 8단까지는 완만하게 오르다가 12단부터 가파르게 상승, 12단 지점에 '냉각 한계' 이름표</div>
+<div style='font-size:12px;color:#888;margin-top:10px;'>직접 그리거나 검색해서 이 자리에 넣고 이 박스는 지우면 돼</div>
+</div>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>그래프처럼 일정 높이를 넘으면 온도가 갑자기 뛴다.<br/>
+쌓는 기술보다 <b>식히는 기술</b>이 병목이 되는 지점이다.</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+<p style='margin:0;border-left:4px solid #222;padding:6px 0 6px 16px;font-size:19px;font-weight:bold;color:#111;line-height:1.6;text-align:left;'>두 방식은 무엇이 다른가</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+<table style='border-collapse:collapse;width:100%;margin:0 auto;font-size:15px;'>
+<tr><th style='background:#03c75a;color:#fff;border:1px solid #03c75a;padding:8px 10px;text-align:center;'>구분</th><th style='background:#03c75a;color:#fff;border:1px solid #03c75a;padding:8px 10px;text-align:center;'>기존 방식</th><th style='background:#03c75a;color:#fff;border:1px solid #03c75a;padding:8px 10px;text-align:center;'>새 방식</th></tr>
+<tr><td style='border:1px solid #ddd;padding:8px 10px;text-align:center;'>연결</td><td style='border:1px solid #ddd;padding:8px 10px;text-align:center;'>범프로 붙임</td><td style='border:1px solid #ddd;padding:8px 10px;text-align:center;'>구리끼리 직접 붙임</td></tr>
+<tr><td style='border:1px solid #ddd;padding:8px 10px;text-align:center;background:#f7fdf9;'>두께</td><td style='border:1px solid #ddd;padding:8px 10px;text-align:center;background:#f7fdf9;'>두꺼움</td><td style='border:1px solid #ddd;padding:8px 10px;text-align:center;background:#f7fdf9;'>얇음</td></tr>
+<tr><td style='border:1px solid #ddd;padding:8px 10px;text-align:center;'>열 전달</td><td style='border:1px solid #ddd;padding:8px 10px;text-align:center;'>느림</td><td style='border:1px solid #ddd;padding:8px 10px;text-align:center;'>빠름</td></tr>
+</table>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>열이 지나가는 저항은 두께에 비례한다.</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+<div style='margin:0;padding:14px 16px;border:2px dashed #4a7fd4;border-radius:6px;background:#f5f8fd;text-align:center;'>
+<div style='font-size:13px;font-weight:bold;color:#4a7fd4;margin-bottom:8px;'>[수식] 이 자리에 수식 넣기</div>
+<div style='font-size:18px;color:#111;margin-bottom:10px;'>R = L/k A</div>
+<div style='font-size:12px;color:#888;margin-bottom:4px;'>아래 LaTeX을 복사해서 수식 편집기에 넣거나, 렌더러로 이미지를 만들어 이 자리에 넣어줘</div>
+<div style='font-family:Consolas,monospace;font-size:13px;line-height:1.6;color:#111;background:#fff;border:1px solid #ddd;border-radius:4px;padding:10px;text-align:left;'>R = \frac{L}{k A}</div>
+</div>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>두께가 얇고 잘 통하는 재료일수록 열이 쉽게 빠진다는 뜻이다.</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+<div class='se-component se-quotation se-l-quotation_quote' style='margin:0;'><div class='se-component-content'><div class='se-section se-section-quotation se-l-quotation_quote'><blockquote class='se-quotation-container' style='margin:0;border:0;padding:8px 0;text-align:center;'><div class='se-module se-module-text se-quote'><p class='se-text-paragraph se-text-paragraph-align-center' style='margin:0;font-size:18px;font-weight:bold;color:#111;line-height:1.8;text-align:center;'><span style='color:#03c75a;font-size:26px;font-weight:bold;'>&#8220;</span> 쌓는 기술보다 식히는 기술이 먼저다 <span style='color:#03c75a;font-size:26px;font-weight:bold;'>&#8221;</span></p></div></blockquote></div></div></div>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+<div style='margin:20px 0;padding:14px 16px;border:2px dashed #03c75a;border-radius:6px;background:#f7fdf9;text-align:left;'>
+<div style='font-size:13px;font-weight:bold;color:#03c75a;margin-bottom:6px;'>[사진2] 이 자리에 AI 이미지 넣기 (쓸 만한 실제 사진을 못 찾은 자리)</div>
+<div style='font-size:14px;color:#333;margin-bottom:10px;'>두 접합 방식의 두께 차이를 나란히 비교</div>
+<div style='font-size:12px;color:#888;margin-bottom:4px;'>아래 프롬프트를 제미나이(gemini.google.com)에 그대로 복사해서 넣으면 됨</div>
+<div style='font-family:Consolas,monospace;font-size:13px;line-height:1.6;color:#111;background:#fff;border:1px solid #ddd;border-radius:4px;padding:10px;'>A side-by-side cross-section of two stacks of thin silicon plates on a dark base, the left stack joined by small solder bumps with visible gaps, the right stack bonded flat with no gaps and noticeably thinner, eye-level side view, deep navy background, cool cyan rim light with warm amber highlights on the joints, matte silicon and polished copper textures, precise technical atmosphere</div>
+<div style='font-size:12px;color:#666;margin-top:8px;'>스타일: 3D 단면 일러스트 / 비율: 16:9</div>
+</div>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+<p style='margin:0;border-left:4px solid #222;padding:6px 0 6px 16px;font-size:19px;font-weight:bold;color:#111;line-height:1.6;text-align:left;'>취준생에게 주는 신호</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>예전엔 칩을 잘 그리는 쪽이 주목받았다.<br/>
+이제는 <b>쌓고 잇고 식히는 쪽</b>에도 사람이 몰린다.</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>일정을 당긴 결과는 다음 분기 수율 소식에서 드러날 것이다.<br/>
+패키징 쪽 채용 공고도 같이 지켜볼 생각이다.</p>
+<p style='margin:0;line-height:1.9;text-align:center;'>&nbsp;</p>
+
+<p style='margin-top:28px;color:#03c75a;font-size:15px;font-weight:bold;text-align:center;'>#HBM #고대역폭메모리 #적층 #하이브리드본딩 #반도체패키징 #후공정 #열관리 #반도체 #메모리반도체 #AI반도체 #반도체공부 #반도체뉴스 #취업준비 #전공공부 #IT뉴스</p>
+
+<p style="color:#999;font-size:12px;margin-top:32px;border-top:1px solid #eee;padding-top:12px;text-align:left;">이 본문 전체를 선택해서 복사한 뒤 네이버 블로그 에디터에 붙여넣어줘. 표/굵게/밑줄/해시태그 서식이 그대로 유지돼 (단, PC에서 복사할 것 — 모바일에서는 표가 깨짐). 점선 박스는 사진 자리표시자니까, 사진을 그 자리에 넣고 박스는 지우면 돼 — <b>파란 박스</b>는 링크에 있는 실제 사진을 받아서 넣고 <b>사진 바로 아래에 출처 한 줄</b>까지 같이 넣는 자리, <b>초록 박스</b>는 실제 사진을 못 찾아서 프롬프트로 이미지를 만들어 넣는 자리야 — 프롬프트를 제미나이(gemini.google.com)에 붙여넣으면 무료로 그려줘.<br/><b>붙여넣은 뒤 할 일 하나</b>: 해시태그 바로 위 <b>맨 마지막 문단</b>(오늘 글을 닫는 내 의견)을 선택해서 <b>인용구 → 말풍선</b>으로 바꿔줘. 붙여넣기로는 인용구 종류를 지정할 수가 없어서 이 두 클릭만 수동이야.</p>
+<div style='margin-top:28px;padding:16px;background:#fafafa;border:1px solid #e5e5e5;border-radius:6px;text-align:left;'>
+<div style='font-size:14px;font-weight:bold;color:#333;margin-bottom:4px;'>이미지 모아보기 (실제 사진 링크 + AI 프롬프트)</div>
+<div style='font-size:12px;color:#888;margin-bottom:12px;'>파란 줄은 그 링크에서 사진을 받아 쓰고 출처 한 줄을 사진 아래에 붙이면 되고, 회색 프롬프트 줄은 제미나이(gemini.google.com)에 그대로 붙여넣으면 돼 (이 블록 자체는 블로그 본문에 붙여넣지 말 것)</div>
+<div style='margin:10px 0;font-size:13px;line-height:1.6;word-break:break-all;'><b>사진1</b> 실제 HBM 패키지 사진으로 적층 구조 설명 (저작자: C. Spille (pcgameshardware.de) / 라이선스: CC BY-SA 4.0)<br/><a href='https://commons.wikimedia.org/wiki/File:AMD_Fiji_GPU_package_with_GPU,_HBM_memory_and_interposer.jpg' style='color:#2f6fdb;'>https://commons.wikimedia.org/wiki/File:AMD_Fiji_GPU_package_with_GPU,_HBM_memory_and_interposer.jpg</a><br/><span style='color:#666;'>출처 표기: 사진: C. Spille, Wikimedia Commons (CC BY-SA 4.0)</span></div>
+<div style='margin:10px 0;font-size:13px;line-height:1.6;'><b>사진2</b> 두 접합 방식의 두께 차이를 나란히 비교 (스타일: 3D 단면 일러스트 / 비율: 16:9)<br/><span style='font-family:Consolas,monospace;color:#111;'>A side-by-side cross-section of two stacks of thin silicon plates on a dark base, the left stack joined by small solder bumps with visible gaps, the right stack bonded flat with no gaps and noticeably thinner, eye-level side view, deep navy background, cool cyan rim light with warm amber highlights on the joints, matte silicon and polished copper textures, precise technical atmosphere</span></div>
+</div>
+
+</body></html>

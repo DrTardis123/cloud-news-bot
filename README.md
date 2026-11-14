@@ -25,6 +25,13 @@
 
 결과물이 어떻게 생겼는지 먼저 보고 싶다면 → [`examples/sample-output.md`](examples/sample-output.md)
 
+<details>
+<summary>📧 실제 초안 메일 화면 보기 (요약표·사진 자리·그래프·표·수식·인용구·해시태그)</summary>
+
+<p align="center"><img src="examples/sample-email.png" width="480" alt="초안 메일 예시"></p>
+
+</details>
+
 ---
 
 ## 목차
