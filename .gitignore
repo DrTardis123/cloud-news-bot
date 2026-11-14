@@ -1,0 +1,7 @@
+work/
+__pycache__/
+.pytest_cache/
+setup/.local.json
+setup/내_설정값.txt
+node_modules/
+.wrangler/

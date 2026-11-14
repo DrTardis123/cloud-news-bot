@@ -1,0 +1,5 @@
+# 이름을 바꾸면 주소도 바뀝니다: https://<name>.<내 계정 이름>.workers.dev
+name = "news-bot-gateway"
+main = "src/index.js"
+compatibility_date = "2026-11-01"
+compatibility_flags = ["nodejs_compat"]
