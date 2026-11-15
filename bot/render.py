@@ -209,7 +209,7 @@ def format_image_suggestion_text(item: ImageItem, idx: int) -> str:
 
 
 def image_suggestions_message(items: list[ImageItem]) -> str | None:
-    """Send-ImageSuggestions가 보내던 텔레그램 본문"""
+    """사진 추천 목록 (세션 답변용)"""
     if not items:
         return None
     blocks = [format_image_suggestion_text(it, i + 1) for i, it in enumerate(items)]
@@ -246,7 +246,7 @@ def parse_summary_table(text) -> list[tuple[str, str]]:
 
 
 def format_markers_for_preview(text):
-    """Format-MarkersForPreview — 텔레그램 미리보기용"""
+    """Format-MarkersForPreview — 세션 답변 미리보기용"""
     if not text:
         return text
     t = re.sub(r"(?m)^[ \t]*\[소제목\][ \t]*(.+?)[ \t]*$", r"━━ **\1** ━━", text, flags=I)

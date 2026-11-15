@@ -1,6 +1,6 @@
 """뉴스봇 흐름.
 
-  수집(collect) → 텔레그램으로 뉴스 사실 전송 → 주인이 의견 답장(handle)
+  수집(collect) → 앱 세션으로 뉴스 사실 전달 → 주인이 그 세션에 의견 답장(handle)
   → 초안 작성 → 분량 확인(필요하면 한 번 늘리기/줄이기) → 메일 발송
   → 이후 메시지는 수정 요청으로 처리
 
@@ -31,7 +31,7 @@ WEEKDAYS = "월화수목금토일"
 HELP = ("사용법\n"
         "/오늘뉴스 — 지금 바로 뉴스 모으기 (매일 정해진 시각에는 자동으로 해)\n"
         "/취소 — 진행 중인 글 취소\n"
-        "뉴스를 받은 뒤 아무 말이나 보내면 → 그게 내 의견이 돼서 초안을 써서 메일로 보내\n"
+        "뉴스를 받은 뒤 이 세션에 아무 말이나 보내면 → 그게 내 의견이 돼서 초안을 써 (메일을 설정했으면 메일로)\n"
         "초안을 받은 뒤 보내는 말은 → 수정 요청으로 처리해 (예: '제목 더 짧게')\n"
         "주제·말투·분량은 저장소의 config.md에서 바꿔.")
 
@@ -200,9 +200,8 @@ def collect() -> str:
             gw.send_text("이미 진행 중인 글이 있어. 뉴스에 대한 의견을 보내거나, 새로 하려면 먼저 /취소를 보내줘.")
             return done("이미 진행 중")
         if st == "approved":
-            gw.send_text("이 날짜 글은 이미 메일로 보냈어. 고칠 점을 말로 보내면 수정할게. 새로 하려면 /취소 후 /오늘뉴스.")
+            gw.send_text("이 날짜 글은 이미 초안을 보냈어. 고칠 점을 말로 보내면 수정할게. 새로 하려면 /취소 후 /오늘뉴스.")
             return done("이미 발송함")
-    gw.send_text(f"🔎 {config_value('주제', '뉴스')} 뉴스 찾는 중... 몇 분 걸려.")
     prompt = template("facts", DATE=ymd(now()), PUB_DATE=date, WEEKDAY=WEEKDAYS[pday.weekday()],
                       HISTORY=history_block(date))
     return write_task("facts", prompt, date=date)
@@ -236,14 +235,12 @@ def handle(text: str) -> str:
         s = load(p)
         s.update(stage="drafting", opinion=text)
         save(p, s)
-        gw.send_text("✍️ 의견 받았어. 초안 쓰는 중... (5분 안팎)")
         return write_task("draft", template("draft", FACTS=s["facts"], OPINION=text), state=str(p))
 
     sent = recent_states(("approved",))
     if sent:
         p = sent[0]
         s = load(p)
-        gw.send_text("🛠 수정 요청으로 받았어. 고치는 중...")
         summary = "\n".join(f"{r['item']} | {r['content']}" for r in s.get("summaryTable", []))
         return write_task("revise", template("revise", TITLE=s.get("title", ""), SUMMARY=summary,
                                              DRAFT=s.get("draft", ""), IMAGES=s.get("imageSuggestions", ""),
@@ -251,7 +248,7 @@ def handle(text: str) -> str:
                           state=str(p))
 
     if recent_states(("drafting",)):
-        gw.send_text("지금 초안을 쓰는 중이야. 메일이 오면 그때 수정할 점을 보내줘.")
+        gw.send_text("지금 초안을 쓰는 중이야. 초안이 나오면 그때 수정할 점을 보내줘.")
         return done("작성 중이라 무시")
     gw.send_text("진행 중인 글이 없어. /오늘뉴스 를 보내면 시작할게.\n\n" + HELP)
     return done("진행 중인 글 없음")
@@ -346,7 +343,7 @@ def revise_done(ctx: dict, result: str) -> str:
     parsed = parse_draft(result)
     if not parsed["title"].strip():
         gw.send_text(result[:3500] or "(빈 응답)")
-        return done("수정본 형식 아님 — 텔레그램으로만 전달")
+        return done("수정본 형식 아님 — 세션으로만 전달")
     return finalize(Path(ctx["state"]), parsed, revised=True)
 
 
@@ -373,11 +370,14 @@ def finalize(p: Path, parsed: dict, revised: bool = False) -> str:
             "초록 박스는 프롬프트를 제미나이(gemini.google.com)에 붙여넣어 그림을 만들어 넣으면 돼.\n"
             "고칠 점이 있으면 그냥 말로 보내줘 (예: '제목 더 짧게').")
     else:
-        gw.send_text("⚠️ 메일 발송에 실패해서 여기로 보낼게. 제목·본문을 블로그에 붙여넣고 사진은 아래 목록대로 넣어줘.")
+        gw.send_text("⚠️ 메일 발송에 실패해서 여기로 보낼게. 제목·본문을 블로그에 붙여넣고 사진은 아래 목록대로 넣어줘."
+                     if gw.mail_enabled() else
+                     f"✅ {label}이야. 제목·본문을 블로그에 붙여넣고 사진은 아래 목록대로 넣어줘. "
+                     "(표·사진 박스까지 서식을 살린 메일로 받고 싶으면 README의 '메일로 받기(선택)'를 설정해)")
         gw.send_text(f"[제목]\n{title}\n\n[본문]\n{render.format_markers_for_preview(body)}")
         msg = render.image_suggestions_message(images)
         if msg:
             gw.send_text(msg)
         if tags:
             gw.send_text(" ".join(tags))
-    return done(f"{label} 확정 ({'메일 발송' if sent else '메일 실패 → 텔레그램'}): {title}")
+    return done(f"{label} 확정 ({'메일 발송' if sent else '세션으로 전달'}): {title}")

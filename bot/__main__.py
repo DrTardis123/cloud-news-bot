@@ -1,15 +1,16 @@
 """사용법 (클라우드의 Claude가 실행):
   python -m bot collect                   # 매일 자동 수집 (또는 /오늘뉴스)
-  python -m bot handle --file work/inbox.txt  # 텔레그램 메시지 처리
+  python -m bot handle --file work/inbox.txt  # 앱 세션 메시지 처리
   python -m bot continue                  # work/result.txt 를 받아 다음 단계로
   python -m bot fail "<사유>"              # 작업을 끝내지 못했을 때
   python -m bot sync "<설명>"              # 상태(state/)를 main에 커밋·푸시
-출력이 `TASK ...`면 work/task.md 를 수행하고 continue, `DONE: ...`이면 sync 후 종료.
+  python -m bot reply                     # 쌓인 답을 출력하고 비움 (세션 답변으로 보여줌)
+출력이 `TASK ...`면 work/task.md 를 수행하고 continue, `DONE: ...`이면 sync → reply 후 종료.
 """
 import subprocess
 import sys
 
-from . import pipeline
+from . import gateway, pipeline
 
 
 def sync(msg: str) -> str:
@@ -44,6 +45,7 @@ def main(argv):
         "continue": pipeline.resume,
         "fail": lambda: pipeline.fail(arg or "알 수 없는 오류"),
         "sync": lambda: sync(arg or "update"),
+        "reply": lambda: gateway.take_reply(),
     }
     print(actions.get(cmd, lambda: __doc__)())
 

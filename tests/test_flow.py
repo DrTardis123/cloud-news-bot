@@ -55,9 +55,14 @@ def make_draft(n_pad):
     return DRAFT.format(pad="가" * n_pad)
 
 
-def bot(tmp, *args, now="2026-11-16T20:05"):
-    env = {**os.environ, "BOT_DRY_RUN": "1", "BOT_STATE_DIR": str(tmp / "state"),
+def bot(tmp, *args, now="2026-11-16T20:05", mail=True):
+    env = {**os.environ, "BOT_STATE_DIR": str(tmp / "state"),
            "BOT_WORK_DIR": str(tmp / "work"), "BOT_NOW": now, "PYTHONIOENCODING": "utf-8"}
+    env.pop("BOT_GATEWAY_URL", None)
+    if mail:
+        env["BOT_DRY_RUN"] = "1"  # 메일을 work/outbox/에 파일로
+    else:
+        env.pop("BOT_DRY_RUN", None)  # 메일 미설정 → 초안이 세션 답변으로
     r = subprocess.run([sys.executable, "-m", "bot", *args], cwd=ROOT, env=env,
                        capture_output=True, text=True, encoding="utf-8")
     assert r.returncode == 0, r.stderr
@@ -86,6 +91,9 @@ def test_full_flow(tmp_path):
     result(tmp_path, "📰 오늘의 뉴스\n\n1. 첫 이슈\n- 사실 (OO에 따르면)\n- [파고들 지점] 원리")
     assert bot(tmp_path, "continue").startswith("DONE")
     assert json.loads((tmp_path / "state" / "2026-11-17.json").read_text(encoding="utf-8"))["stage"] == "facts_sent"
+    reply = bot(tmp_path, "reply")  # 세션 답변: 뉴스 요약 + 의견 요청
+    assert "첫 이슈" in reply and "네 생각" in reply
+    assert bot(tmp_path, "reply") == "(보낼 답 없음)"
 
     assert handle(tmp_path, "첫 이슈가 제일 흥미롭다").startswith("TASK draft")
     result(tmp_path, make_draft(30))  # 너무 짧음 → 늘리기 요청
@@ -123,3 +131,15 @@ def test_bad_draft_reverts(tmp_path):
     result(tmp_path, "형식이 아닌 응답")
     assert bot(tmp_path, "continue").startswith("DONE: 실패")
     assert handle(tmp_path, "다시 의견").startswith("TASK draft")  # 의견 다시 보내면 재시도
+
+
+def test_without_mail(tmp_path):
+    bot(tmp_path, "collect", mail=False)
+    result(tmp_path, "1. 이슈\n- 사실")
+    bot(tmp_path, "continue", mail=False)
+    bot(tmp_path, "reply")
+    handle(tmp_path, "의견", mail=False)
+    result(tmp_path, make_draft(600))
+    assert "세션으로 전달" in bot(tmp_path, "continue", mail=False)
+    reply = bot(tmp_path, "reply")
+    assert "[제목]" in reply and "시험용 제목" in reply and "#테스트" in reply

@@ -1,16 +1,16 @@
-"""cloud-news-bot 설치 도우미.
+"""cloud-news-bot 메일 설정 도우미 — 초안을 메일로 받고 싶을 때만 (선택).
+
+메일 없이도 봇은 돌아간다 (초안이 Claude 앱 세션 답변으로 온다).
+표·사진 박스까지 서식을 살린 메일로 받고 싶을 때 이 스크립트를 한 번 돌린다.
 
 실행:  python setup/setup.py
   - 중간에 멈춰도 다시 실행하면 끝난 단계는 건너뛴다 (기록: setup/.local.json)
   - 처음부터 다시: python setup/setup.py --reset
 
 하는 일
-  1. 텔레그램 봇 토큰 확인 + 내 채팅 ID 자동으로 찾기
-  2. 메일(네이버/Gmail) 로그인 시험
-  3. Cloudflare에 중계 서버 배포 + 비밀값 넣기
-  4. claude.ai에 넣을 값을 파일로 정리 (복사용)
-  5. 예약 작업 토큰 받아서 연결
-  6. 텔레그램 웹훅 연결 + 시험 메시지
+  1. 메일(네이버/Gmail) 로그인 시험
+  2. Cloudflare에 메일 중계 서버 배포 + 비밀값 넣기 + 시험 메일 발송
+  3. claude.ai 클라우드 환경에 넣을 값을 파일로 정리 (복사용)
 """
 from __future__ import annotations
 
@@ -87,10 +87,6 @@ def http_json(url, data=None, headers=None, method=None):
             return {"ok": False, "error": f"HTTP {e.code}"}
 
 
-def tg(token, method, **params):
-    return http_json(f"https://api.telegram.org/bot{token}/{method}", params or None)
-
-
 def run(cmd, cwd=GATEWAY_DIR, capture=False, input_text=None):
     """npx·npm은 Windows에서 .cmd라 shell=True로 부른다."""
     return subprocess.run(cmd, cwd=cwd, shell=True, text=True, encoding="utf-8", errors="replace",
@@ -124,43 +120,8 @@ def step_check():
     say(f"  Node.js {r.stdout.strip()} ✓")
 
 
-def step_telegram(st):
-    title(1, "텔레그램 봇 연결")
-    if st.get("tg_token") and st.get("chat_id"):
-        say(f"  이미 완료 (봇 @{st.get('bot_username')}) — 건너뜀")
-        return
-    while True:
-        token = ask("  BotFather가 준 봇 토큰을 붙여넣고 Enter: ")
-        me = tg(token, "getMe")
-        if me.get("ok"):
-            break
-        say("  ✗ 토큰이 틀렸어요. 숫자:영문 형태 전체를 복사했는지 확인해 주세요.")
-    username = me["result"]["username"]
-    say(f"  ✓ 봇 확인: @{username}")
-    tg(token, "deleteWebhook")  # 예전 웹훅이 있으면 메시지를 못 읽으므로 잠깐 해제
-    say()
-    say(f"  이제 휴대폰 텔레그램에서 @{username} 을 열고 아무 메시지나 보내 주세요 (예: 안녕).")
-    say("  기다리는 중... (최대 3분)")
-    chat_id = None
-    for _ in range(36):
-        res = tg(token, "getUpdates", timeout=0)
-        for u in reversed(res.get("result", [])):
-            msg = u.get("message") or {}
-            if msg.get("chat", {}).get("id"):
-                chat_id = msg["chat"]["id"]
-                break
-        if chat_id:
-            break
-        time.sleep(5)
-    if not chat_id:
-        sys.exit("  메시지를 못 찾았어요. 봇에게 메시지를 보낸 뒤 다시 실행해 주세요.")
-    say(f"  ✓ 내 채팅 ID 찾음: {chat_id}")
-    st.update(tg_token=token, chat_id=str(chat_id), bot_username=username)
-    save_state(st)
-
-
 def step_mail(st):
-    title(2, "메일 설정 (초안을 받을 메일)")
+    title(1, "메일 설정 (초안을 받을 메일)")
     if st.get("mail_user"):
         say(f"  이미 완료 ({st['mail_user']}) — 건너뜀")
         return
@@ -190,7 +151,7 @@ def step_mail(st):
 
 
 def step_cloudflare(st):
-    title(3, "Cloudflare에 중계 서버 올리기")
+    title(2, "Cloudflare에 메일 중계 서버 올리기")
     if st.get("gateway_url"):
         say(f"  이미 완료 ({st['gateway_url']}) — 건너뜀")
         return
@@ -216,11 +177,9 @@ def step_cloudflare(st):
     say(f"  ✓ 배포 완료: {url}")
 
     st.setdefault("gateway_key", secrets.token_urlsafe(32))
-    st.setdefault("webhook_secret", secrets.token_urlsafe(32))
     say("  비밀값 넣는 중...")
     put_secrets({
-        P + "TG_TOKEN": st["tg_token"], P + "CHAT_ID": st["chat_id"],
-        P + "WEBHOOK_SECRET": st["webhook_secret"], P + "GATEWAY_KEY": st["gateway_key"],
+        P + "GATEWAY_KEY": st["gateway_key"],
         P + "MAIL_HOST": st["mail_host"], P + "MAIL_PORT": st["mail_port"],
         P + "MAIL_USER": st["mail_user"], P + "MAIL_PASS": st["mail_pass"],
         P + "BOT_NAME": "뉴스봇",
@@ -235,20 +194,21 @@ def step_cloudflare(st):
         time.sleep(10)
     else:
         sys.exit("  주소가 아직 안 열려요. 5분 뒤 다시 실행해 주세요 (끝난 단계는 건너뜀).")
-    r = http_json(f"{url}/{BOT}/tg", {"text": "🔧 설치 중: 중계 서버 → 텔레그램 연결 확인"},
+    r = http_json(f"{url}/{BOT}/mail",
+                  {"subject": "🔧 뉴스봇 메일 연결 확인", "html": "<p>이 메일이 보이면 메일 설정 성공이에요.</p>"},
                   {"Authorization": f"Bearer {st['gateway_key']}"})
     if not r.get("ok"):
-        sys.exit(f"  텔레그램 발송 시험 실패: {r}")
-    say("  ✓ 텔레그램에 시험 메시지가 갔어요")
+        sys.exit(f"  시험 메일 발송 실패: {r}")
+    say(f"  ✓ {st['mail_user']} 으로 시험 메일을 보냈어요")
     st["gateway_url"] = url
     save_state(st)
 
 
 def step_values_file(st):
-    title(4, "claude.ai에 넣을 값 정리")
+    title(3, "claude.ai에 넣을 값 정리")
     host = st["gateway_url"].replace("https://", "")
     VALUES_FILE.write_text(
-        "claude.ai 클라우드 환경에 넣을 값 (README 5단계)\n"
+        "claude.ai 클라우드 환경에 넣을 값 (README '메일로 받기' 4~5번)\n"
         "※ 이 파일은 내 컴퓨터에만 있고 GitHub에 올라가지 않아요. 다 쓰면 지워도 됩니다.\n\n"
         "[환경 변수] 칸에 아래 한 줄을 그대로:\n"
         f"BOT_GATEWAY_URL={st['gateway_url']}/{BOT}\n\n"
@@ -266,57 +226,17 @@ def step_values_file(st):
     say("  (터미널 글자를 드래그해서 복사하지 마세요. 줄바꿈·테두리가 섞여서 실패하는 일이 많아요)")
 
 
-def step_routine(st):
-    title(5, "Claude 예약 작업 연결")
-    if st.get("routine_url"):
-        say("  이미 완료 — 건너뜀")
-        return
-    say("  README 5~6단계를 따라 claude.ai에서")
-    say("   (1) 클라우드 환경 'news-bot'  (2) 예약 작업 'news-message'(API)  (3) 'news-daily'(매일)")
-    say("  를 만든 뒤 돌아오세요.")
-    input("  다 했으면 Enter...")
-    while True:
-        rid = ask("  'news-message' 예약 작업 페이지의 주소(또는 trig_로 시작하는 ID)를 붙여넣고 Enter: ")
-        m = re.search(r"trig_[A-Za-z0-9]+", rid)
-        if m:
-            break
-        say("  ✗ trig_로 시작하는 부분이 없어요. 브라우저 주소창의 주소를 통째로 복사해 주세요.")
-    url = f"https://api.anthropic.com/v1/claude_code/routines/{m.group(0)}/fire"
-    token = ask("  API 토큰(sk-ant-oat01-로 시작)을 붙여넣고 Enter (화면에 안 보이는 게 정상): ", secret=True)
-    if not token.startswith("sk-ant-"):
-        sys.exit("  토큰 모양이 달라요. 토큰을 다시 만들어(Regenerate) 복사해 주세요.")
-    put_secrets({P + "ROUTINE_URL": url, P + "ROUTINE_TOKEN": token})
-    say("  ✓ 연결 완료")
-    st["routine_url"] = url
-    save_state(st)
-
-
-def step_webhook(st):
-    title(6, "텔레그램 → 중계 서버 연결")
-    r = tg(st["tg_token"], "setWebhook", url=f"{st['gateway_url']}/{BOT}/telegram",
-           secret_token=st["webhook_secret"], allowed_updates=["message"], drop_pending_updates=True)
-    if not r.get("ok"):
-        sys.exit(f"  웹훅 연결 실패: {r}")
-    say("  ✓ 연결 완료")
-    http_json(f"{st['gateway_url']}/{BOT}/tg",
-              {"text": "🎉 설치 끝! 이제 이 채팅에 /오늘뉴스 를 보내 보세요.\n(처음엔 클라우드 준비에 1~3분 걸려요)"},
-              {"Authorization": f"Bearer {st['gateway_key']}"})
-    say()
-    say("  모든 설치가 끝났어요! 텔레그램에서 /오늘뉴스 를 보내 보세요.")
-    say(f"  비밀값 기록 파일 {STATE_FILE.name} 은 다시 설치할 때 쓰니 지우지 말고, 남에게 보내지 마세요.")
-
-
 def main():
     if "--reset" in sys.argv and STATE_FILE.exists():
         STATE_FILE.unlink()
     st = load_state()
     step_check()
-    step_telegram(st)
     step_mail(st)
     step_cloudflare(st)
     step_values_file(st)
-    step_routine(st)
-    step_webhook(st)
+    say()
+    say("  메일 설정 끝! README '메일로 받기' 4~5번대로 claude.ai 환경에 값을 넣으면 다음 초안부터 메일로 와요.")
+    say(f"  비밀값 기록 파일 {STATE_FILE.name} 은 다시 설치할 때 쓰니 지우지 말고, 남에게 보내지 마세요.")
 
 
 if __name__ == "__main__":
