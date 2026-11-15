@@ -57,7 +57,7 @@ def make_draft(n_pad):
 
 def bot(tmp, *args, now="2026-11-16T20:05", mail=True):
     env = {**os.environ, "BOT_STATE_DIR": str(tmp / "state"),
-           "BOT_WORK_DIR": str(tmp / "work"), "BOT_NOW": now, "PYTHONIOENCODING": "utf-8"}
+           "BOT_WORK_DIR": str(tmp / "work"), "BOT_NOW": now, "PYTHONIOENCODING": "utf-8", "BOT_NO_PULL": "1"}
     env.pop("BOT_GATEWAY_URL", None)
     if mail:
         env["BOT_DRY_RUN"] = "1"  # 메일을 work/outbox/에 파일로
